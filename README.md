@@ -1,4 +1,4 @@
-# Deep Research Tool - AI-Powered Research to Podcast Generator
+# Research Podcast Agent - AI-Powered Google Search to Podcast Generator
 
 An intelligent research system that leverages multiple AI agents to conduct comprehensive web research on any topic and automatically converts the findings into engaging podcast episodes.
 
@@ -16,7 +16,7 @@ An intelligent research system that leverages multiple AI agents to conduct comp
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                    Deep Research System                         │
+│                  Research System                                │
 └─────────────────────────┬───────────────────────────────────────┘
                           │
 ┌─────────────────────────▼───────────────────────────────────────┐
@@ -92,7 +92,7 @@ graph TD
 ## 📁 Project Structure
 
 ```
-Deep_Research_Tool/
+Research_Podcast_Agent/
 ├── main_system.py          # Main orchestration and user interface
 ├── supervisor.py           # Task planning and agent coordination
 ├── web_researcher.py       # Web search and content extraction
@@ -148,7 +148,7 @@ Deep_Research_Tool/
 ## 💡 Usage Example
 
 ```bash
-🔬 Deep Research Tool
+🔬 Research Podcast Agent
 ========================================
 Enter research topic: Impact of AI on healthcare
 
@@ -262,10 +262,6 @@ python -m pytest test.py::TestReporter -v
 3. Commit changes (`git commit -m 'Add amazing feature'`)
 4. Push to branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 🙏 Acknowledgments
 
