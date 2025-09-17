@@ -1,282 +1,171 @@
-# Research Podcast Agent - AI-Powered Google Search to Podcast Generator
+# Research Podcast Agent – AI-Powered Research-to-Podcast System
 
-An intelligent research system that leverages multiple AI agents to conduct comprehensive web research on any topic and automatically converts the findings into engaging podcast episodes.
+An asynchronous, multi-agent Python system that plans focused web research, executes structured information gathering, synthesizes a professional report, and converts it into a multi‑part podcast (MP3) automatically.
 
-## 🌟 Features
+## ✨ Core Capabilities
+- **Dynamic Research Planning** – Supervisor generates follow‑up questions and decomposes the topic.
+- **Automated Web Recon** – Web Researcher performs Google Custom Search (with simulated fallback) and scrapes pages (BeautifulSoup) for relevant content.
+- **Structured Synthesis** – Reporter compiles findings into a rich, sectioned research report with confidence and metadata.
+- **Podcast Generation** – Speaker rewrites report into a conversational script and produces multi‑part audio via OpenAI TTS.
+- **Confidence & Source Tracking** – Each task returns sources + a confidence score.
+- **Fully Async Pipeline** – Uses `asyncio` for concurrent search, scraping, and LLM calls.
 
-- **Multi-Agent Research System**: Coordinated team of AI agents for comprehensive research
-- **Intelligent Query Planning**: LLM-powered research strategy with follow-up questions
-- **Web Content Extraction**: Real-time web scraping and content synthesis
-- **Comprehensive Reporting**: Professional research reports with citations
-- **Podcast Generation**: Automatic conversion of research reports to audio podcasts
-- **Parallel Processing**: Efficient concurrent task execution
-- **Source Validation**: Confidence scoring and source reliability assessment
-
-## 🏗️ System Architecture
-
+## 🧩 High-Level Architecture
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                  Research System                                │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────────┐
-│                   Main System                                   │
-│  • User interface                                               │
-│  • Flow coordination                                            │
-│  • File management                                              │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │
-┌─────────────────────────▼───────────────────────────────────────┐
-│                   Supervisor Agent                              │
-│  • Research planning                                            │
-│  • Task decomposition                                           │
-│  • Agent coordination                                           │
-│  • Parallel execution                                           │
-└─────────────────────────┬───────────────────────────────────────┘
-                          │
-                          ▼
-              ┌───────────────────────┐
-              │    Sub-Agents Pool    │
-              └───────────┬───────────┘
-                          │
-        ┌─────────────────┼─────────────────┐
-        ▼                 ▼                 ▼
-┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-│Web Research │  │  Reporter   │  │   Speaker   │
-│    Agent    │  │    Agent    │  │    Agent    │
-│• Web search │  │• Report     │  │• TTS        │
-│• Content    │  │  synthesis  │  │• Podcast    │
-│  extraction │  │• Citation   │  │  creation   │
-│• Fact check │  │• Formatting │  │• Audio      │
-└─────────────┘  └─────────────┘  └─────────────┘
+┌─────────────────────────────────────────────────────────┐
+│                    DeepResearchSystem                   │
+│ (entrypoint: main_system.py)                            │
+└───────────────┬─────────────────────────────────────────┘
+                │ orchestrates
+                ▼
+        ┌──────────────┐  plans / delegates  ┌────────────────┐
+        │ Supervisor    │────────────────────▶ Sub‑Agents Pool │
+        └─────┬────────┘                      └────┬─────┬─────┘
+              │ assigns                              │     │
+              ▼                                      │     │
+      ┌────────────────┐                     ┌────────┐  ┌────────┐
+      │ Task Queue      │                     │Reporter│  │Speaker │
+      └─────┬──────────┘                     └────────┘  └────────┘
+            │ executes (async)
+            ▼
+      ┌──────────────┐
+      │ WebResearcher│  (search + scrape + synthesize findings)
+      └──────────────┘
 ```
 
-## 🔄 Program Flow Diagram
-
+## 🔄 Execution Flow (Mermaid)
 ```mermaid
-graph TD
-    A[User Input: Research Topic] --> B[Main System Initialization]
-    B --> C[Supervisor: Generate Follow-up Questions]
-    C --> D[User Answers Questions]
-    D --> E[Supervisor: Analyze Topic Complexity]
-    E --> F{Complex Topic?}
-    
-    F -->|Yes| G[Break Down into Sub-topics]
-    F -->|No| H[Single Research Task]
-    
-    G --> I[Create Research Tasks]
-    H --> I
-    
-    I --> J[Delegate Tasks to Web Researcher]
-    J --> K[Parallel Task Execution]
-    
-    K --> L[Web Search via Google API]
-    L --> M[Content Extraction & Cleaning]
-    M --> N[LLM Synthesis of Findings]
-    N --> O[Confidence Score Calculation]
-    
-    O --> P[Collect All Task Results]
-    P --> Q[Reporter: Generate Comprehensive Report]
-    Q --> R[Save Report to File]
-    
-    R --> S[Speaker: Convert Report to Podcast Script]
-    S --> T[LLM: Rewrite as Conversational Script]
-    T --> U[Text-to-Speech Conversion]
-    U --> V[Create Multi-part Audio Files]
-    V --> W[Save Podcast Episodes]
-    
-    W --> X[User Choice: Keep or Delete Podcast]
-    X --> Y[Process Complete]
+flowchart TD
+    A[User enters topic] --> B[Supervisor creates follow-up questions]
+    B --> C[User answers]
+    C --> D[Supervisor analyzes complexity]
+    D --> E[Generate tasks]
+    E --> F[Delegate to WebResearcher]
+    F --> G[Parallel web search + scraping]
+    G --> H[LLM synthesis of findings]
+    H --> I[Aggregate TaskResults]
+    I --> J[Reporter: full structured report]
+    J --> K[Save report file]
+    K --> L[Speaker: rewrite as podcast script]
+    L --> M[Chunk & TTS generation]
+    M --> N[Podcast folder output]
+    N --> O[User chooses keep/delete]
 ```
 
 ## 📁 Project Structure
+```
+Deep_Research_Tool/
+├── agent.py              # Base agent + TaskResult model (Pydantic)
+├── main_system.py        # Entry point / orchestration / user I/O
+├── supervisor.py         # Planning, decomposition, delegation
+├── web_researcher.py     # Web search + scraping + source scoring
+├── reporter.py           # Report synthesis (OpenAI chat completions)
+├── speaker.py            # Podcast script + TTS chunked MP3 output
+├── test.py               # Pytest-based component/integration tests
+├── requirements.txt      # Locked dependency versions
+├── podcasts/             # Generated podcast episode folders
+└── .gitignore            # Ignores .env, caches, etc.
+```
 
-```
-Research_Podcast_Agent/
-├── main_system.py          # Main orchestration and user interface
-├── supervisor.py           # Task planning and agent coordination
-├── web_researcher.py       # Web search and content extraction
-├── reporter.py            # Report generation and synthesis
-├── speaker.py             # Podcast creation and TTS
-├── agent.py               # Base agent classes and interfaces
-├── test.py                # Comprehensive test suite
-├── requirements.txt       # Python dependencies
-├── .env                   # API keys and configuration
-├── .gitignore            # Git ignore patterns
-└── podcasts/             # Generated podcast episodes
-    └── [topic]_[timestamp]/
-        ├── part_1.mp3
-        ├── part_2.mp3
-        └── ...
-```
+## 🔧 Technology Stack (Actual)
+| Layer | Tools / Libraries | Notes |
+|-------|-------------------|-------|
+| Async runtime | `asyncio`, `aiohttp` | Parallel scraping & API calls |
+| LLM access | OpenAI `chat.completions` | Direct usage (no LangChain) |
+| Web scraping | `BeautifulSoup4` | HTML extraction + cleaning |
+| Data models | `pydantic` | Typed TaskResult objects |
+| Env/config | `python-dotenv` | Loads API keys from `.env` |
+| Testing | `pytest`, `pytest-asyncio` | Unit + async integration |
+| Audio | OpenAI TTS (`tts-1`) | Multi-part MP3 generation |
+
+> ✳️ Not Used: LangChain, LangGraph, vector databases, retrieval pipelines.
 
 ## 🚀 Quick Start
-
-### Prerequisites
-
-- Python 3.8+
-- OpenAI API key
-- Google Search API key (optional, has fallback)
-
-### Installation
-
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/Chickychicken/Research-Podcast-Agent.git
-   cd Research-Podcast-Agent
-   ```
-
-2. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
-
-3. **Set up environment variables**
-   Create a `.env` file in the project root:
-   ```env
-   OPENAI_API_KEY=your_openai_api_key_here
-   GOOGLE_SEARCH_API_KEY=your_google_search_api_key_here
-   GOOGLE_SEARCH_ENGINE_ID=your_search_engine_id_here
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
-
-4. **Run the system**
-   ```bash
-   python main_system.py
-   ```
-
-## 💡 Usage Example
-
 ```bash
-🔬 Research Podcast Agent
-========================================
-Enter research topic: Impact of AI on healthcare
+# 1. Clone
+git clone https://github.com/Chickychicken/Research-Podcast-Agent.git
+cd Research-Podcast-Agent
 
-📋 Planning research strategy...
+# 2. (Recommended) Create virtual env
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-To better focus the research, please consider these follow-up questions:
+# 3. Install dependencies
+pip install -r requirements.txt
 
-1. Are you interested in current applications or future potential of AI in healthcare?
-2. Should the research focus on specific medical specialties or general healthcare?
-3. Are you looking for benefits, challenges, or both aspects of AI implementation?
+# 4. Create .env (DO NOT COMMIT)
+cat > .env <<'EOF'
+OPENAI_API_KEY=your_openai_key
+GOOGLE_SEARCH_API_KEY=your_google_search_api_key   # optional
+GOOGLE_SEARCH_ENGINE_ID=your_cse_id                # optional
+EOF
 
-Your answer to question 1: Current applications and near-term developments
-Your answer to question 2: General healthcare with focus on diagnostics
-Your answer to question 3: Both benefits and challenges
-
-🔍 Executing research tasks...
-✅ Completed 4 research tasks
-📊 Generating final report...
-🎉 Research completed successfully!
-📄 Full report saved to research_report_Impact_of_AI_on_healthcare.txt
-
-🎙️ Converting report to podcast format...
-🎵 Podcast created at: podcasts/Impact_of_AI_on_healthcare_20250915_143022/
-
-Would you like to keep this podcast file? (y/n): y
+# 5. Run
+python main_system.py
 ```
 
-## 🔧 Configuration
+## 🗂️ Generated Artifacts
+| Artifact | Location | Description |
+|----------|----------|-------------|
+| Research report | `research_report_<topic>.txt` | Full structured output |
+| Podcast audio | `podcasts/<topic>_<timestamp>/part_*.mp3` | Sequential episode parts |
 
-### API Keys Required
-
-| Service | Required | Purpose | Fallback |
-|---------|----------|---------|----------|
-| OpenAI API | ✅ Yes | LLM operations, TTS | None |
-| Google Search API | ❌ Optional | Web search | Simulated results |
-| Gemini API | ❌ Optional | Additional LLM | OpenAI only |
-
-### Customization Options
-
-- **Voice Selection**: Change TTS voice in `speaker.py`
-- **Model Selection**: Modify LLM models in agent constructors
-- **Parallel Tasks**: Adjust `max_parallel_tasks` in supervisor
-- **Content Limits**: Modify `max_sources` and chunk sizes
+## 🛡️ Security & Secrets
+- `.env` is **ignored** by Git – verify with: `git check-ignore -v .env`.
+- If a secret was ever committed, rotate it immediately (OpenAI dashboard, Google Cloud console).
+- Never embed API keys directly in code; environment loading handled via `dotenv` in each agent.
+- Consider using GitHub Actions secrets if automating.
 
 ## 🧪 Testing
-
-Run the comprehensive test suite:
-
 ```bash
 # Run all tests
-python -m pytest test.py -v
+pytest -v
 
-# Run specific test categories
-python -m pytest test.py::TestWebResearcher -v
-python -m pytest test.py::TestReporter -v
+# Focus a class
+pytest test.py::TestWebResearcher::test_execute_task_success -v
 ```
+Current tests cover: TaskResult integrity, WebResearcher behavior, Reporter synthesis formatting, basic integration flow.
 
-## 📊 Features in Detail
+## ⚙️ Configuration Knobs
+| Component | Setting | Where | Purpose |
+|-----------|---------|-------|---------|
+| Supervisor | `max_parallel_tasks` | `supervisor.py` | Concurrency ceiling |
+| WebResearcher | `max_sources` | `web_researcher.py` | Limit scraped sources |
+| WebResearcher | `timeout` | `web_researcher.py` | Per-request timeout |
+| Speaker | `max_chunk_size` | `speaker.py` | TTS text chunk length |
+| Speaker | `voice_name` | `speaker.py` | TTS voice selection |
 
-### Research Planning
-- **Intelligent Decomposition**: LLM analyzes topic complexity
-- **Follow-up Questions**: Gathers context for focused research
-- **Parallel Execution**: Concurrent task processing
-- **Adaptive Strategy**: Adjusts approach based on topic complexity
-
-### Web Research
-- **Multi-Source Search**: Google API integration with fallbacks
-- **Content Extraction**: BeautifulSoup-powered scraping
-- **Quality Scoring**: Relevance and reliability assessment
-- **Error Handling**: Graceful failure management
-
-### Report Generation
-- **LLM Synthesis**: GPT-4 powered analysis and writing
-- **Professional Format**: Academic-style reporting
-- **Source Citations**: Proper attribution and references
-- **Metadata Tracking**: Confidence scores and statistics
-
-### Podcast Creation
-- **Script Conversion**: LLM rewrites reports conversationally
-- **Multi-part Audio**: Automatic chunking for long content
-- **Voice Options**: Multiple TTS voice selections
-- **Cross-platform Playback**: macOS, Windows, Linux support
-
-## 🔍 Technical Details
-
-### Key Technologies
-- **Async/Await**: Non-blocking concurrent operations
-- **LangChain**: LLM orchestration and chaining
-- **BeautifulSoup**: HTML parsing and content extraction
-- **OpenAI APIs**: GPT-4 and TTS-1 models
-- **Google Custom Search**: Real-time web search
-- **Pydantic**: Type validation and data models
-
-### Performance Optimizations
-- **Semaphore Limiting**: Prevents API rate limiting
-- **Connection Pooling**: Efficient HTTP requests
-- **Content Caching**: Reduces redundant processing
-- **Error Recovery**: Robust fallback mechanisms
+## 📊 Confidence & Metadata
+Reports include: number of completed tasks, total sources analyzed, average confidence score, and timestamp footer for reproducibility.
 
 ## 🚧 Limitations
+- Relies on public web pages (no JS rendering / headless browser yet).
+- No persistence layer or vector store (stateless per run).
+- Error handling is basic for some scraping edge cases (CAPTCHAs, paywalls).
+- No caching; repeated queries re-fetch sources.
 
-- **API Costs**: OpenAI usage can accumulate charges
-- **Rate Limits**: Google Search API has daily quotas
-- **Content Quality**: Dependent on source website accessibility
-- **Language Support**: Currently optimized for English content
+## 🛣️ Roadmap Ideas
+- [ ] Add caching layer (SQLite or simple file cache)
+- [ ] Add optional vector store for semantic enrichment
+- [ ] Parallel podcast voice variants
+- [ ] Web UI (FastAPI + simple frontend)
+- [ ] Add retry/backoff utilities for network calls
+- [ ] Configurable prompt templates via external YAML
+- [ ] Structured source citation formatting (Markdown footnotes)
 
 ## 🤝 Contributing
+1. Fork & branch: `git checkout -b feature/your-feature`
+2. Write tests for new logic
+3. Run `pytest -v`
+4. Open PR with clear description + before/after behavior
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 📄 License
+MIT (add a `LICENSE` file if not present).
 
 ## 🙏 Acknowledgments
-
-- OpenAI for GPT-4 and TTS capabilities
-- Google for Custom Search API
-- BeautifulSoup team for HTML parsing
-- LangChain community for LLM orchestration
-
-## 🆘 Support
-
-For questions or issues:
-1. Check the [Issues](https://github.com/Chickychicken/Research-Podcast-Agent/issues) page
-2. Review the test suite for usage examples
-3. Examine the code documentation and comments
+- OpenAI API team for models & TTS
+- BeautifulSoup maintainers
+- Python async ecosystem
 
 ---
-
-**Made with ❤️ for researchers, students, and podcast enthusiasts**
+**Built for focused research ➜ structured insight ➜ spoken knowledge.**
