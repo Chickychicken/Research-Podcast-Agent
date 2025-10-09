@@ -239,9 +239,8 @@ Reports include: number of completed tasks, total sources analyzed, average conf
 4. Open PR with clear description + before/after behavior
 
 ## 🙏 Acknowledgments
-- OpenAI API team for models & TTS
-- BeautifulSoup maintainers
-- Python async ecosystem
+- https://blog.langchain.com/open-deep-research/
+- https://github.com/langchain-ai/open_deep_research/blob/main/src/open_deep_research/deep_researcher.py
 
 ---
-**Built for focused research ➜ structured insight ➜ spoken knowledge.**
+**Built for Google search ➜ structured insight ➜ spoken knowledge.**
